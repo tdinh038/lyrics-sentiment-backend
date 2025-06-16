@@ -1,3 +1,32 @@
+// server.js
+const express = require('express');
+const cors = require('cors');
+const axios = require('axios');
+require('dotenv').config();
+
+// Starting log messages for debugging
+console.log('Starting server with environment:');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('AZURE_ENDPOINT:', process.env.AZURE_ENDPOINT ? 'Set (value hidden)' : 'Not set');
+console.log('AZURE_API_KEY:', process.env.AZURE_API_KEY ? 'Set (value hidden)' : 'Not set');
+console.log('FRONTEND_URL:', process.env.FRONTEND_URL);
+
+const app = express();
+
+// Configure CORS to allow requests from your frontend
+app.use(cors({
+    origin: process.env.FRONTEND_URL || '*', // In production, restrict to your frontend URL
+    methods: ['GET', 'POST'],
+    credentials: true
+}));
+
+app.use(express.json());
+
+// Health check endpoint
+app.get('/', (req, res) => {
+    res.status(200).send('Service is running');
+});
+
 // Sentiment analysis endpoint
 app.post('/api/analyze-sentiment', async (req, res) => {
     try {
@@ -54,4 +83,9 @@ app.post('/api/analyze-sentiment', async (req, res) => {
             details: process.env.NODE_ENV === 'development' ? error.response?.data : undefined
         });
     }
+});
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
